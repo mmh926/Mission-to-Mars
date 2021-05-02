@@ -123,7 +123,7 @@ def hemisphere_image_urls (browser):
     # Optional delay for loading the page
     browser.is_element_present_by_css('div.list_text', wait_time=1)
     hemisphere_image_urls = []
-    
+
     links = browser.find_by_css('a.product-item img')
 
     for i in range(len(links)):
@@ -133,11 +133,17 @@ def hemisphere_image_urls (browser):
         browser.find_by_css('a.product-item img')[i].click()
     
         # Next, find the sample image tag and extract the href
-        slide_elem = browser.links.find_by_text('Sample').first
-        hemisphere['img_url'] = slide_elem['href']
+        hemisphere = scrape_hemisphere(browser.html)
+        hemisphere['img_url'] = url + hemisphere['img_url']
+
+
+        # # Next, find the sample image tag and extract the href
+        # slide_elem = browser.links.find_by_text('Sample').first
+        # #hemisphere['img_url'] = slide_elem['href']
+        # hemisphere['img_url'] = url + slide_elem['href']
     
-        # Get the hemisphere title
-        hemisphere['title'] = browser.find_by_css('h2.title').text
+        # # Get the hemisphere title
+        # hemisphere['title'] = browser.find_by_css('h2.title').text
  
         # Append hemispher object to list
         hemisphere_image_urls.append(hemisphere)
@@ -156,7 +162,7 @@ def scrape_hemisphere(html_text):
         title_elem=None
         sample_elem=None
 
-    hemispheres=[]
+   # hemispheres=[]
     hemispheres={
         "title": title_elem,
         "img_url": sample_elem
