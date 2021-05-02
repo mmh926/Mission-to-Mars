@@ -2,9 +2,12 @@
 # Import Splinter and BeautifulSoup
 import pandas as pd
 import datetime as dt
+import pymongo
+import requests
 from splinter import Browser
 from bs4 import BeautifulSoup as soup
 from webdriver_manager.chrome import ChromeDriverManager
+
 
 def scrape_all():
     # Initiate headless driver for deployment
@@ -12,6 +15,7 @@ def scrape_all():
     browser = Browser('chrome', **executable_path, headless=True)
 
     news_title, news_paragraph = mars_news(browser)
+    
 
     # Run all scraping functions and store results in dictionary
     data = {
@@ -19,13 +23,18 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "hemisphere_image_urls": hemisphere_image_urls(browser)
     }
     
     # End the automated browsing session. 
     # Stop webdriver and return data
     browser.quit()
     return data
+
+# Create a function for hemisphere image url to scrape data
+#def hemisphere_image_urls (browser):
+#    url = browser
 
 
 # Declare and define the function.
@@ -103,6 +112,63 @@ def mars_facts():
 
     # Convert DataFrame back into HTML-ready code using the .to_html() function. 
     return df.to_html(classes="table table-striped")
+
+# Create a function for hemisphere image url to scrape data
+def hemisphere_image_urls (browser):
+    
+    # Use browser to visit the URL 
+    url = 'https://data-class-mars-hemispheres.s3.amazonaws.com/Mars_Hemispheres/index.html'
+
+    browser.visit(url)
+    # Optional delay for loading the page
+    browser.is_element_present_by_css('div.list_text', wait_time=1)
+    hemisphere_image_urls = []
+
+    links = browser.find_by_css('a.product-item img')
+
+    for i in range(len(links)):
+        hemisphere = {}
+   
+        # Find the elements on each loop
+        browser.find_by_css('a.product-item img')[i].click()
+    
+        # Next, find the sample image tag and extract the href
+        hemisphere = scrape_hemisphere(browser.html)
+        hemisphere['img_url'] = url + hemisphere['img_url']
+
+
+        # # Next, find the sample image tag and extract the href
+        # slide_elem = browser.links.find_by_text('Sample').first
+        # #hemisphere['img_url'] = slide_elem['href']
+        # hemisphere['img_url'] = url + slide_elem['href']
+    
+        # # Get the hemisphere title
+        # hemisphere['title'] = browser.find_by_css('h2.title').text
+ 
+        # Append hemispher object to list
+        hemisphere_image_urls.append(hemisphere)
+   
+        # Navigate backwards
+        browser.back()
+
+    return hemisphere_image_urls
+
+def scrape_hemisphere(html_text):
+    souph = soup(html_text, "html.parser")
+    try:
+        title_elem=souph.find("h2", class_="title").get_text()
+        sample_elem=souph.find("a", text="Sample").get("href")
+    except AttributeError:
+        title_elem=None
+        sample_elem=None
+
+   # hemispheres=[]
+    hemispheres={
+        "title": title_elem,
+        "img_url": sample_elem
+    }    
+    return hemispheres
+
 
 if __name__ == "__main__":
     # If running as script, print scraped data
