@@ -49,6 +49,7 @@
           </div>
         </div>
         <!--display hemispheres-->
+        <div class="container-fluid" style="background-color: #99857A;">
         <div class="row" id="mars-hemispheres">
           <div class="col-md-8 offset-4">
           <div class="page-header">
@@ -57,12 +58,14 @@
             </h2>
           </div>
           </div>
+            <br>
           {% for hemisphere in mars.hemispheres %}
           <div class="col-md-6 border">
-            <div class="thumbnail">
-              <img width="512 px" height="512"
-               src="{{hemisphere.img_url | safe}}">
-               
+            <div class="card text-center" style="width: 32rem;">
+              <img class="card-img-top text-center" id="scale_id" src="{{ dict.img_url }}">
+                <div class="card-body text-center">
+                  <h4 class="card-title text-center">{{ dict.title }}</h4>
+                </div>
             </div>
             <div>
               <h3> {{ hemisphere.title | safe}} </h3>
@@ -70,6 +73,7 @@
             
           </div>
           {% endfor %}
+        </div>
         </div> 
       </div>
     </div>
